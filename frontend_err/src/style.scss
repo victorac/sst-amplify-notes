@@ -1,0 +1,29 @@
+// @use '@material/button/mdc-button';
+@use '@material/button/styles';
+
+// .foo-button {
+//   @include button.container-fill-color(rgba(129, 156, 196, 0.123));
+// }
+
+@use "@material/checkbox/checkbox"; // Required only for data table with row selection.
+@use "@material/icon-button/icon-button"; // Required only for data table with column sorting.
+@use "@material/data-table/data-table";
+
+@include checkbox.core-styles;
+@include icon-button.core-styles;
+@include data-table.core-styles;
+@include data-table.theme-baseline;
+
+.container {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.table {
+    align-self: flex-start;
+}
+
+.table-button {
+    align-self: flex-start;
+}
