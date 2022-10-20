@@ -6,6 +6,7 @@ import config from "../config";
 import Form from "react-bootstrap/Form";
 import LoaderButton from "../components/LoaderButton";
 import "./Notes.css";
+import { s3Upload } from "../lib/awsLib";
 
 export default function Notes() {
     const file = useRef(null);
@@ -52,6 +53,18 @@ export default function Notes() {
         file.current = event.target.files[0];
     }
 
+    function saveNote(note) {
+        return API.put("notes", `/notes/${id}`, {
+            body: note
+        });
+    }
+
+    function deleteOldAttachment(){
+        if (note.attachment) {
+            return Storage.vault.remove(note.attachment);
+        }
+    }
+
     async function handleSubmit(event) {
         let attachment;
         event.preventDefault();
@@ -65,6 +78,27 @@ export default function Notes() {
         }
 
         setIsLoading(true);
+
+        try {
+            if (file.current) {
+                attachment = await s3Upload(file.current);
+                await deleteOldAttachment();
+            }
+
+            await saveNote({
+                content,
+                attachment: attachment || note.attachment,
+            });
+
+            nav("/");
+        } catch(e) {
+            onError(e);
+            setIsLoading(false);
+        }
+    }
+
+    function deleteNote() {
+        return API.del("notes", `/notes/${id}`)
     }
 
     async function handleDelete(event) {
@@ -79,6 +113,15 @@ export default function Notes() {
         }
 
         setIsDeleting(true);
+
+        try {
+            await deleteNote();
+            await deleteOldAttachment();
+            nav("/");
+        } catch(e) {
+            onError(e);
+            setIsDeleting(false);
+        }
     }
 
     return (
