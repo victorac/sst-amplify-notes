@@ -42,7 +42,7 @@ export default function Notes() {
     }, [id]);
 
     function validateForm() {
-        return content.length > 0;
+        return content && content.length > 0;
     }
 
     function formatFilename(str) {

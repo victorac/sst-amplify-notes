@@ -24,6 +24,14 @@ export function FrontendStack({ stack, app }) {
     // });
 
     const site = new ReactStaticSite(stack, "ReactSite2", {
+        customDomain:
+          app.stage === "prod"
+            ? {
+              domainName: "miraitomo.com",
+              domainAlias: "www.miraitomo.com"
+              
+            }
+            : undefined,
         path: "frontend",
         // Pass in our environment variables
         environment: {
@@ -37,6 +45,6 @@ export function FrontendStack({ stack, app }) {
       });
 
     stack.addOutputs({
-        SiteUrl: site.url,
+        SiteUrl: site.customDomainUrl || site.url,
     });
 }
