@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 
 export function useFormFields(initialState) {
@@ -14,3 +14,29 @@ export function useFormFields(initialState) {
         },
     ];
 }
+
+export function useLocalStorage(storageKey, fallbackState) {
+    const [value, setValue] = useState(
+      JSON.parse(localStorage.getItem(storageKey)) ?? fallbackState
+    );
+  
+    useEffect(() => {
+      localStorage.setItem(storageKey, JSON.stringify(value));
+    }, [value, storageKey]);
+  
+    return [value, setValue];
+  };
+
+  export function useSessionStorage(storageKey, fallbackState) {
+    const [value, setValue] = useState(
+      JSON.parse(sessionStorage.getItem(storageKey)) ?? fallbackState
+    );
+  
+    useEffect(() => {
+      sessionStorage.setItem(storageKey, JSON.stringify(value));
+    }, [value, storageKey]);
+  
+    return [value, setValue];
+  };
+
+  
