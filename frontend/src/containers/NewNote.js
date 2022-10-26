@@ -39,6 +39,7 @@ export default function NewNote() {
                 const attachmentFile = await urltoFile(picture, "picture.jpg", "image/jpeg");
                 const dataTransfer = new DataTransfer();
                 dataTransfer.items.add(attachmentFile);
+                file.current = attachmentFile;
                 fileInput.files = dataTransfer.files;
             }
         }

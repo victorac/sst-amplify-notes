@@ -39,7 +39,7 @@ export default function Home() {
     function renderNotesList(notes) {
         return (
             <>
-                <LinkContainer to="/notes/new">
+                <LinkContainer to="/camera">
                     <ListGroup.Item action className="py-3 text-nowrap text-truncate">
                         <BsPencilSquare size={17} />
                         <span className="ml-2 font-weight-bold">Create a new entry</span>
