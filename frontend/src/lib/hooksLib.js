@@ -29,11 +29,11 @@ export function useLocalStorage(storageKey, fallbackState) {
 
   export function useSessionStorage(storageKey, fallbackState) {
     const [value, setValue] = useState(
-      JSON.parse(sessionStorage.getItem(storageKey)) ?? fallbackState
+      sessionStorage.getItem(storageKey) ?? fallbackState
     );
   
     useEffect(() => {
-      sessionStorage.setItem(storageKey, JSON.stringify(value));
+      sessionStorage.setItem(storageKey, value);
     }, [value, storageKey]);
   
     return [value, setValue];

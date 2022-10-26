@@ -1,5 +1,5 @@
-import React, { useRef, useState } from "react";
-import { Button, Form } from "react-bootstrap";
+import React, { useEffect, useRef, useState } from "react";
+import { Button, Form, Image } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
 import LoaderButton from "../components/LoaderButton";
 import { API } from "aws-amplify";
@@ -8,7 +8,21 @@ import "./NewNote.css";
 import { onError } from "../lib/errorLib";
 import { s3Upload } from "../lib/awsLib";
 
+
+function urltoFile(url, filename, mimeType) {
+    mimeType = mimeType || (url.match(/^data:([^;]+);/) || '')[1];
+    return (fetch(url)
+        .then(function (res) { return res.arrayBuffer(); })
+        .then(function (buf) { return new File([buf], filename, { type: mimeType }); })
+    );
+}
+
 export default function NewNote() {
+    let usePicture = (document.location.search.match(/usePicture=([^&]*)/) || [null, null])[1];
+    if (!usePicture || usePicture === "false") {
+        usePicture = false
+    }
+    const [picture, setPicture] = useState(usePicture ? sessionStorage.getItem("picture") : null);
     const file = useRef(null);
     const nav = useNavigate();
     const [content, setContent] = useState("");
@@ -18,8 +32,34 @@ export default function NewNote() {
         return content.length > 0;
     }
 
+    useEffect(() => {
+        async function onLoad() {
+            if (picture) {
+                const fileInput = document.getElementById("file");
+                const attachmentFile = await urltoFile(picture, "picture.jpg", "image/jpeg");
+                const dataTransfer = new DataTransfer();
+                dataTransfer.items.add(attachmentFile);
+                fileInput.files = dataTransfer.files;
+            }
+        }
+        
+        onLoad();
+    }, []);
+
+    function getBase64(file) {
+        var reader = new FileReader();
+        reader.readAsDataURL(file);
+        reader.onload = function () {
+            setPicture(reader.result);
+        };
+        reader.onerror = function (error) {
+            console.log('Error: ', error);
+        };
+    }
+
     function handleFileChange(event) {
         file.current = event.target.files[0];
+        getBase64(file.current);
     }
 
     async function handleSubmit(event) {
@@ -37,9 +77,9 @@ export default function NewNote() {
 
         try {
             const attachment = file.current ? await s3Upload(file.current) : null;
-            await createNote( { content, attachment } );
+            await createNote({ content, attachment });
             nav("/");
-        } catch(e) {
+        } catch (e) {
             onError(e);
             setIsLoading(false);
         }
@@ -64,7 +104,8 @@ export default function NewNote() {
                     </Form.Group>
                     <Form.Group controlId="file">
                         <Form.Label>Attachment</Form.Label>
-                        <Form.Control onChange={handleFileChange} type="file" />
+                        {picture && <Image className="m-2" width={50} height={50} src={picture} thumbnail />}
+                        <Form.Control onChange={handleFileChange} type="file" accept=".jpg,.jpeg" />
                     </Form.Group>
                     <LoaderButton
                         type="submit"

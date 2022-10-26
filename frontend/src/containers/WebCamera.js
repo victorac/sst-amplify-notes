@@ -23,8 +23,8 @@ export default function WebCamera(props) {
     const retry = () => {
         setPicture(null);
     }
-    const done = () => {
-        nav("/notes/new");
+    const done = (usePicture) => {
+        nav(`/notes/new?usePicture=${usePicture}`);
     }
     return (
         <div className="d-flex flex-column gap-2">
@@ -34,7 +34,7 @@ export default function WebCamera(props) {
 
                         <Image src={picture} fluid rounded />
                         <Button onClick={retry}> Take a different picture </Button>
-                        <Button variant="success" onClick={done}> Done </Button>
+                        <Button variant="success" onClick={() => done(true)}> Done </Button>
                     </>
                     :
                     <>
@@ -51,7 +51,7 @@ export default function WebCamera(props) {
                         <Button onClick={capture}> Capture photo </Button>
                     </>
             }
-            <Button variant="secondary" onClick={done}> Use an existing picture </Button>
+            <Button variant="secondary" onClick={() => done(false)}> Use an existing picture </Button>
         </div>
     );
 }
