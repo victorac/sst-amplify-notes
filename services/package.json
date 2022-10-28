@@ -4,8 +4,10 @@
   "type": "module",
   "scripts": {},
   "dependencies": {
+    "@aws-sdk/client-dynamodb": "^3.198.0",
     "@aws-sdk/client-rekognition": "^3.198.0",
     "@aws-sdk/client-s3": "^3.198.0",
+    "@aws-sdk/lib-dynamodb": "^3.198.0",
     "aws-sdk": "^2.1231.0",
     "stripe": "^10.13.0",
     "uuid": "^9.0.0"

@@ -45,6 +45,20 @@ export function StorageStack({ stack, app }) {
             imageProcessor: {
                 function: {
                     handler: "functions/imageProcessor.main",
+                    environment: {
+                        TEXT_DETECTION_TABLE_NAME: textDetectionTable.tableName
+                    },
+                    permissions: [
+                        "s3",
+                        "dynamodb",
+                        new iam.PolicyStatement({
+                            actions: ["rekognition:*"],
+                            effect: iam.Effect.ALLOW,
+                            resources: [
+                                "*",
+                            ],
+                        })
+                    ],
                 },
                 events: ["object_created"],
                 filters: [
@@ -53,25 +67,27 @@ export function StorageStack({ stack, app }) {
             },
         }
     });
-    bucket.notificationFunctions[0].attachPermissions([
-        "s3",
-        new iam.PolicyStatement({
-            actions: ["rekognition:*"],
-            effect: iam.Effect.ALLOW,
-            resources: [
-                "*",
-            ],
-        }),
-        new iam.PolicyStatement({
-            actions: ["s3:*"],
-            effect: iam.Effect.ALLOW,
-            resources: [
-                bucket.bucketArn + "/private/${cognito-identity.amazonaws.com:sub}/*",
-            ],
-        })
-    ])
+    // bucket.notificationFunctions[0].attachPermissions([
+    //     "s3",
+    //     new iam.PolicyStatement({
+    //         actions: ["rekognition:*"],
+    //         effect: iam.Effect.ALLOW,
+    //         resources: [
+    //             "*",
+    //         ],
+    //     }),
+    //     new iam.PolicyStatement({
+    //         actions: ["s3:*"],
+    //         effect: iam.Effect.ALLOW,
+    //         resources: [
+    //             bucket.bucketArn + "/private/${cognito-identity.amazonaws.com:sub}/*",
+    //         ],
+    //     }),
+    //     "dynamodb:PutItem",
+    // ])
     // bucket.attachPermissions([
     //     "s3",
+    //     "dynamodb",
     //     new iam.PolicyStatement({
     //         actions: ["rekognition:*"],
     //         effect: iam.Effect.ALLOW,
