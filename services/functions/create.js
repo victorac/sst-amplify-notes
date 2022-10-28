@@ -6,7 +6,7 @@ export const main = handler(async (event) => {
     // Request body is passed is as a JSON enconded string in 'event.body'
     const data = JSON.parse(event.body);
     const params = {
-        TableName: process.env.TABLE_NAME,
+        TableName: process.env.ENTRY_TABLE_NAME,
         Item: {
             // The attributes of the item to be created
             userId: event.requestContext.authorizer.iam.cognitoIdentity.identityId,
