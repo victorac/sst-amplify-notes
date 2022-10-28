@@ -21,19 +21,18 @@ export const main = handler(async (event) => {
         },
     }
     const data = await rekognitionClient.send(new DetectTextCommand(params));
-    console.log(event.Records[0].userIdentity)
-
-    try {
-        console.log(event.requestContext.authorizer.iam.cognitoIdentity.identityId)
-    } catch (e) {
-        console.log("Error", e);
-    }
+    const detectedLines = data.TextDetections.filter(el => el.Type === "LINE")
+    const detectedWords = data.TextDetections.filter(el => el.Type === "WORD")
+    const sortedDetectedLines = detectedLines.sort((a, b) => b.Confidence - a.Confidence).slice(0, 20)
+    const sortedDetectedWords = detectedWords.sort((a, b) => b.Confidence - a.Confidence).slice(0, 100)
+    const userIdentityId = objectKey.split("/")[1];
     const putParams = {
         TableName: process.env.TEXT_DETECTION_TABLE_NAME,
         Item: {
-            userId: "defaul_tuser",
+            userId: userIdentityId,
             imageId: objectKey.split("/").pop(),
-            textDetections: data.TextDetections,
+            lineDetections: sortedDetectedLines,
+            wordDetections: sortedDetectedWords,
             createdAt: Date.now(),
         },
     };
@@ -55,7 +54,6 @@ export const main = handler(async (event) => {
     const translateConfig = { marshallOptions, unmarshallOptions };
     const docClient = DynamoDBDocumentClient.from(dynamoDBClient, translateConfig);
     await docClient.send(new PutCommand(putParams))
-
 
     return putParams.Item;
 });
