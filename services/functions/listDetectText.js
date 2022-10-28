@@ -1,8 +1,16 @@
 import handler from "../util/handler";
 import dynamoDb from "../util/dynamodb";
 
-export const main = handler((event) => {
-    console.log("list");
+export const main = handler(async (event) => {
+    const params = {
+        TableName: process.env.TEXT_DETECTION_TABLE_NAME,
+        KeyConditionExpression: "userId = :userId",
+        ExpressionAttributeValues: {
+            ":userId": event.requestContext.authorizer.iam.cognitoIdentity.identityId
+        },
+    };
 
-    return { status: true }
+    const result = await dynamoDb.query(params);
+
+    return result.Items;
 })

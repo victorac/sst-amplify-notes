@@ -1,4 +1,4 @@
-import React, { useState, useRef, useCallback } from "react";
+import React, { useState, useRef, useCallback, useEffect } from "react";
 import Webcam from "react-webcam";
 import Button from "react-bootstrap/Button"
 import { useSessionStorage } from "../lib/hooksLib";
@@ -8,6 +8,7 @@ import { s3Upload } from "../lib/awsLib";
 import config from "../config";
 import { onError } from "../lib/errorLib";
 import LoaderButton from "../components/LoaderButton";
+import { API } from "aws-amplify";
 
 // TODO
 //     add a file input to analyze pictures from local storage
@@ -37,6 +38,16 @@ export default function WebCamera(props) {
         facingMode: "environment"
     }
     const [picture, setPicture] = useSessionStorage("picture", null)
+    const imageDimensions = {
+        width: null,
+        height: null
+    }
+    if (picture) {
+        const img = new Image();
+        img.src = picture;
+        imageDimensions.width = img.width;
+        imageDimensions.height = img.height;
+    }
     const webcamRef = useRef(null);
     const capture = useCallback(
         () => {
@@ -52,20 +63,13 @@ export default function WebCamera(props) {
         nav(`/notes/new?usePicture=${usePicture}`);
     }
 
-
     const file = useRef(null);
-    const [imageDimesions, setImageDimensions] = useState({width: null, height: null});
+
     function getBase64(file) {
         var reader = new FileReader();
         reader.readAsDataURL(file);
         reader.onload = function () {
-            const base64Image = new Image();
-            base64Image.src = reader.result;
-            setImageDimensions({
-                width: base64Image.width,
-                height: base64Image.height,
-            });
-            setPicture(base64Image.src);
+            setPicture(reader.result);
         };
         reader.onerror = function (error) {
             console.log('Error: ', error);
@@ -75,7 +79,31 @@ export default function WebCamera(props) {
     function handleFileChange(event) {
         file.current = event.target.files[0];
         getBase64(file.current);
+        file.current.internalName = "picture_TBA.jpg";
     }
+
+    const [isPolling, setIsPolling] = useState(false);
+    const [pictureId, setPictureId] = useState(null);
+    const [detectionResult, setDetectionResult] = useState(null);
+
+    useEffect(() => {
+        if (!isPolling) {
+            return;
+        }
+
+        const id = setInterval(async () => {
+            const imageDetectionResponse = await API.get("notes", `/detect-text/${pictureId}`);
+            if (!imageDetectionResponse.notFound) {
+                clearInterval(id);
+                console.log(imageDetectionResponse);
+                setDetectionResult(imageDetectionResponse);
+                setIsPolling(false);
+            }
+        }, isPolling ? 2500 : null);
+
+        return () => clearInterval(id);
+
+    }, [isPolling]);
 
     async function handleSubmit(useAttachment) {
         let imageFile = null;
@@ -97,44 +125,61 @@ export default function WebCamera(props) {
 
         try {
             const attachment = imageFile ? await s3Upload(imageFile) : null;
+            setPictureId(attachment);
+            setIsPolling(true);
             setIsLoading(false);
         } catch (e) {
             onError(e);
             setIsLoading(false);
         }
     }
+    const imageOrResult = () => {
+        if (detectionResult) {
+            console.log(detectionResult);
+            const buttons = detectionResult.lineDetections.sort((a, b) => a.Id - b.Id).map((line) => {
+                return <Button>{line.DetectedText}</Button>
+            });
+            console.log(buttons);
+            return <>{buttons}</>
+        }
+        return null;
+    }
 
     return (
-        <div className="d-flex flex-column gap-2">
-            {picture && <RBImage src={picture} fluid rounded width={imageDimesions.width} height={imageDimesions.height}/>}
-            {!picture &&
-                <>
-                    <Webcam
-                        marginHeight={0}
-                        marginWidth={0}
-                        audio={false}
-                        height={height}
-                        width={width}
-                        ref={webcamRef}
-                        screenshotFormat="image/jpeg"
-                        videoConstraints={videoConstraints}
-                    />
-                    <Button onClick={capture}> Capture photo </Button>
-                </>}
-            {picture && <Button onClick={retry}> Take a different picture </Button>}
-            <FormGroup controlId="file">
-                <FormLabel>Or upload a local picture:</FormLabel>
-                <FormControl onChange={handleFileChange} type="file" accept=".jpg,.jpeg" />
-            </FormGroup>
+        <>
+            {imageOrResult()}
+            <div className="d-flex flex-column gap-2">
+                {!detectionResult && picture &&  <RBImage src={picture} fluid rounded width={imageDimensions.width} height={imageDimensions.height} />}
+                {!picture &&
+                    <>
+                        <Webcam
+                            marginHeight={0}
+                            marginWidth={0}
+                            audio={false}
+                            height={height}
+                            width={width}
+                            ref={webcamRef}
+                            screenshotFormat="image/jpeg"
+                            videoConstraints={videoConstraints}
+                        />
+                        <Button onClick={capture}> Capture photo </Button>
+                    </>}
+                {picture && <Button onClick={retry}> Take a different picture </Button>}
+                <FormGroup controlId="file">
+                    <FormLabel>Or upload a local picture:</FormLabel>
+                    <FormControl onChange={handleFileChange} type="file" accept=".jpg,.jpeg" />
+                </FormGroup>
 
-            <LoaderButton
-                isLoading={isLoading}
-                variant="success"
-                onClick={() => handleSubmit(false)}
-                style={{ "margin-top": 0 }}
-            >
-                Upload picture
-            </LoaderButton>
-        </div>
+                <LoaderButton
+                    isLoading={isLoading}
+                    variant="success"
+                    onClick={() => handleSubmit(false)}
+                    style={{ "marginTop": 0 }}
+                >
+                    Upload picture
+                </LoaderButton>
+                <Button onClick={() => setIsPolling(false)}>Helper</Button>
+            </div>
+        </>
     );
 }
