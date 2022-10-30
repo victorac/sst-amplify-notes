@@ -9,6 +9,11 @@ import config from "../config";
 import { onError } from "../lib/errorLib";
 import LoaderButton from "../components/LoaderButton";
 import { API } from "aws-amplify";
+import Tag from "../components/Tag";
+import ReactCrop from 'react-image-crop';
+import 'react-image-crop/dist/ReactCrop.css';
+import {debugResult} from "../test/defaultDetectionResult";
+
 
 // TODO
 //     add a file input to analyze pictures from local storage
@@ -84,7 +89,7 @@ export default function WebCamera(props) {
 
     const [isPolling, setIsPolling] = useState(false);
     const [pictureId, setPictureId] = useState(null);
-    const [detectionResult, setDetectionResult] = useState(null);
+    const [detectionResult, setDetectionResult] = useState(debugResult);
 
     useEffect(() => {
         if (!isPolling) {
@@ -133,14 +138,15 @@ export default function WebCamera(props) {
             setIsLoading(false);
         }
     }
+
+    const [crop, setCrop] = useState(null);
+
     const imageOrResult = () => {
         if (detectionResult) {
-            console.log(detectionResult);
-            const buttons = detectionResult.lineDetections.sort((a, b) => a.Id - b.Id).map((line) => {
-                return <Button>{line.DetectedText}</Button>
+            const tags = detectionResult.lineDetections.sort((a, b) => a.Id - b.Id).map((line) => {
+                return <Tag name={line.DetectedText} confidence={line.Confidence} boundingBox={line.Geometry.BoundingBox} setCrop={setCrop} />
             });
-            console.log(buttons);
-            return <>{buttons}</>
+            return <div className="">{tags}</div>
         }
         return null;
     }
@@ -149,7 +155,14 @@ export default function WebCamera(props) {
         <>
             {imageOrResult()}
             <div className="d-flex flex-column gap-2">
-                {!detectionResult && picture &&  <RBImage src={picture} fluid rounded width={imageDimensions.width} height={imageDimensions.height} />}
+                {
+                    picture
+                    && <div style={imageDimensions}>
+                        <ReactCrop disabled="true" maxHeight={imageDimensions.height} maxWidth={imageDimensions.width} crop={crop} onChange={c => setCrop(c)}>
+                        <RBImage  src={picture} fluid rounded width={imageDimensions.width} height={imageDimensions.height} />
+                    </ReactCrop>
+                    </div>
+                }
                 {!picture &&
                     <>
                         <Webcam
