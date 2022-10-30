@@ -3,23 +3,23 @@ import Badge from "react-bootstrap/Badge";
 import "./Tag.css";
 
 
-export default function Tag({ name, confidence, boundingBox, setCrop }) {
+export default function Tag({ id, name, confidence, boundingBox, rects, setRects }) {
     const [checked, setChecked] = useState(false);
-
-    function handleClick() {
-        let crop = null;
-        console.log(!checked);
+    
+    function handleClick(event) {
+        const rect_id = event.target.id;
         if (!checked) {
-            crop = {
-                unit: '%', // Can be 'px' or '%'
-                x: boundingBox.Left * 100,
-                y: boundingBox.Top * 100,
-                width: boundingBox.Width * 100,
-                height: boundingBox.Height * 100
+            rects[rect_id] = {
+                x: boundingBox.Left,
+                y: boundingBox.Top,
+                width: boundingBox.Width,
+                height: boundingBox.Height,
             }
+        } else {
+            delete rects[rect_id];
         }
         setChecked(!checked);
-        setCrop(crop);
+        setRects({...rects});
     }
 
     let className = "Tag m-1";
@@ -27,6 +27,6 @@ export default function Tag({ name, confidence, boundingBox, setCrop }) {
         className += " text-muted";
     }
 
-    return <Badge onClick={handleClick} className={className} pill bg="light" text="dark">{name}</Badge>
+    return <Badge id={`tag-${id}`} onClick={handleClick} className={className} pill bg="light" text="dark">{name}</Badge>
 
 }

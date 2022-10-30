@@ -139,27 +139,47 @@ export default function WebCamera(props) {
         }
     }
 
-    const [crop, setCrop] = useState(null);
+    const [rects, setRects] = useState({});
+
 
     const detectionBox = () => {
         if (detectionResult) {
-            const tags = detectionResult.lineDetections.sort((a, b) => a.Id - b.Id).map((line) => {
-                return <Tag name={line.DetectedText} confidence={line.Confidence} boundingBox={line.Geometry.BoundingBox} setCrop={setCrop} />
+            const tags = detectionResult.lineDetections.sort((a, b) => a.Id - b.Id).map((line, index) => {
+                return <Tag key={`tag_${index}`} id={index} name={line.DetectedText} confidence={line.Confidence} boundingBox={line.Geometry.BoundingBox} rects={rects} setRects={setRects} />
             });
             return <div className="">{tags}</div>
         }
         return null;
     }
 
+    const canvasRef = useRef(null);
+    const imgRef = useRef(null);
+
+    function redraw() {
+        const ctx = canvasRef.current.getContext("2d");
+        ctx.clearRect(0, 0, canvasRef.current.width, canvasRef.current.height);
+        ctx.drawImage(imgRef.current, 0, 0);
+        Object.values(rects).forEach((rect) => {
+            ctx.strokeRect(
+                rect.x * canvasRef.current.width - 2,
+                rect.y * canvasRef.current.height - 2,
+                rect.width * canvasRef.current.width + 3.5,
+                rect.height * canvasRef.current.height + 3.5);
+        });
+    }
+
+    useEffect(() => {
+        if (canvasRef.current)
+            redraw();
+    }, [canvasRef, imgRef, picture, rects]);
     return (
         <>
             <div className="d-flex flex-column gap-2">
                 {
                     picture
                     && <div style={imageDimensions}>
-                        <ReactCrop disabled="true" maxHeight={imageDimensions.height} maxWidth={imageDimensions.width} crop={crop} onChange={c => setCrop(c)}>
-                            <RBImage src={picture} fluid rounded width={imageDimensions.width} height={imageDimensions.height} />
-                        </ReactCrop>
+                        <canvas id="canvas" ref={canvasRef} width={imageDimensions.width} height={imageDimensions.height} onLoad={redraw}></canvas>
+                        <img ref={imgRef} src={picture} style={{ "display": "none" }} width={imageDimensions.width} height={imageDimensions.height} />
                     </div>
                 }
                 {!picture &&
