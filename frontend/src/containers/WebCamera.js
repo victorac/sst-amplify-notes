@@ -12,7 +12,7 @@ import { API } from "aws-amplify";
 import Tag from "../components/Tag";
 import ReactCrop from 'react-image-crop';
 import 'react-image-crop/dist/ReactCrop.css';
-import {debugResult} from "../test/defaultDetectionResult";
+import { debugResult } from "../test/defaultDetectionResult";
 
 
 // TODO
@@ -141,7 +141,7 @@ export default function WebCamera(props) {
 
     const [crop, setCrop] = useState(null);
 
-    const imageOrResult = () => {
+    const detectionBox = () => {
         if (detectionResult) {
             const tags = detectionResult.lineDetections.sort((a, b) => a.Id - b.Id).map((line) => {
                 return <Tag name={line.DetectedText} confidence={line.Confidence} boundingBox={line.Geometry.BoundingBox} setCrop={setCrop} />
@@ -153,14 +153,13 @@ export default function WebCamera(props) {
 
     return (
         <>
-            {imageOrResult()}
             <div className="d-flex flex-column gap-2">
                 {
                     picture
                     && <div style={imageDimensions}>
                         <ReactCrop disabled="true" maxHeight={imageDimensions.height} maxWidth={imageDimensions.width} crop={crop} onChange={c => setCrop(c)}>
-                        <RBImage  src={picture} fluid rounded width={imageDimensions.width} height={imageDimensions.height} />
-                    </ReactCrop>
+                            <RBImage src={picture} fluid rounded width={imageDimensions.width} height={imageDimensions.height} />
+                        </ReactCrop>
                     </div>
                 }
                 {!picture &&
@@ -177,6 +176,7 @@ export default function WebCamera(props) {
                         />
                         <Button onClick={capture}> Capture photo </Button>
                     </>}
+                {picture && detectionBox()}
                 {picture && <Button onClick={retry}> Take a different picture </Button>}
                 <FormGroup controlId="file">
                     <FormLabel>Or upload a local picture:</FormLabel>
