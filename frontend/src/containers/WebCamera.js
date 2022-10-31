@@ -10,21 +10,8 @@ import { onError } from "../lib/errorLib";
 import LoaderButton from "../components/LoaderButton";
 import { API } from "aws-amplify";
 import Tag from "../components/Tag";
-import ReactCrop from 'react-image-crop';
 import 'react-image-crop/dist/ReactCrop.css';
 import { debugResult } from "../test/defaultDetectionResult";
-
-
-// TODO
-//     add a file input to analyze pictures from local storage
-//     add button to analyze image -> should submit image to S3
-//     the next page is the analyze page
-//     AnalyzeImage
-//     show picture and a box with found keywords
-//     add a popover when selecting a keyword with the portion of the image where the keyword was found
-//     add button to add fields
-//     click one or more keywords to assign to a field as a tag
-//     known tags should appear with a different badge
 
 
 function urltoFile(url, filename, mimeType) {
@@ -35,6 +22,16 @@ function urltoFile(url, filename, mimeType) {
     );
 }
 
+function getViewportSize() {
+    var e = window;
+    var a = 'inner';
+    if (!('innerWidth' in window)) {
+        a = 'client';
+        e = document.documentElement || document.body;
+    }
+    return { width: e[a + 'Width'], height: e[a + 'Height'] }
+}
+
 export default function WebCamera(props) {
     const [isLoading, setIsLoading] = useState(false);
     const nav = useNavigate();
@@ -43,16 +40,6 @@ export default function WebCamera(props) {
         facingMode: "environment"
     }
     const [picture, setPicture] = useSessionStorage("picture", null)
-    const imageDimensions = {
-        width: null,
-        height: null
-    }
-    if (picture) {
-        const img = new Image();
-        img.src = picture;
-        imageDimensions.width = img.width;
-        imageDimensions.height = img.height;
-    }
     const webcamRef = useRef(null);
     const capture = useCallback(
         () => {
@@ -71,14 +58,11 @@ export default function WebCamera(props) {
     const file = useRef(null);
 
     function getBase64(file) {
-        var reader = new FileReader();
-        reader.readAsDataURL(file);
-        reader.onload = function () {
-            setPicture(reader.result);
-        };
-        reader.onerror = function (error) {
-            console.log('Error: ', error);
-        };
+        const reader = new FileReader()
+        reader.addEventListener('load', () =>
+            setPicture(reader.result?.toString() || ''),
+        )
+        reader.readAsDataURL(file)
     }
 
     function handleFileChange(event) {
@@ -156,32 +140,46 @@ export default function WebCamera(props) {
     const imgRef = useRef(null);
 
     function redraw() {
+        if (!imgRef.current) {
+            return;
+        }
+        setImageDimensions({
+            width: imgRef.current.width,
+            height: imgRef.current.height
+        })
         const ctx = canvasRef.current.getContext("2d");
-        ctx.clearRect(0, 0, canvasRef.current.width, canvasRef.current.height);
-        ctx.drawImage(imgRef.current, 0, 0);
+        ctx.clearRect(0, 0, imgRef.current.width, imgRef.current.height);
+        console.log(imgRef.current.complete);
+        console.log(imgRef.current.src)
+        ctx.drawImage(imgRef.current, 0, 0,);
         Object.values(rects).forEach((rect) => {
             ctx.strokeRect(
-                rect.x * canvasRef.current.width - 2,
-                rect.y * canvasRef.current.height - 2,
-                rect.width * canvasRef.current.width + 3.5,
-                rect.height * canvasRef.current.height + 3.5);
+                rect.x * imgRef.current.width - 2,
+                rect.y * imgRef.current.height - 2,
+                rect.width * imgRef.current.width + 3.5,
+                rect.height * imgRef.current.height + 3.5);
         });
     }
-
+    const [imageDimensions, setImageDimensions] = useState({
+        width: null,
+        height: null
+    });
+    useEffect(redraw, [rects]);
     useEffect(() => {
-        if (canvasRef.current)
-            redraw();
-    }, [canvasRef, imgRef, picture, rects]);
+        setTimeout(redraw, 100)
+    }, [picture])
+
     return (
         <>
+            {
+                picture
+                && <div>
+                    <canvas id="canvas" ref={canvasRef} width={imageDimensions.width} height={imageDimensions.height} ></canvas>
+                    <img ref={imgRef} src={picture} style={{ "display": "none" }} onLoad={redraw} />
+                </div>
+            }
             <div className="d-flex flex-column gap-2">
-                {
-                    picture
-                    && <div style={imageDimensions}>
-                        <canvas id="canvas" ref={canvasRef} width={imageDimensions.width} height={imageDimensions.height} onLoad={redraw}></canvas>
-                        <img ref={imgRef} src={picture} style={{ "display": "none" }} width={imageDimensions.width} height={imageDimensions.height} />
-                    </div>
-                }
+
                 {!picture &&
                     <>
                         <Webcam
@@ -211,7 +209,6 @@ export default function WebCamera(props) {
                 >
                     Upload picture
                 </LoaderButton>
-                <Button onClick={() => setIsPolling(false)}>Helper</Button>
             </div>
         </>
     );
