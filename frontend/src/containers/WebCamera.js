@@ -149,8 +149,6 @@ export default function WebCamera(props) {
         })
         const ctx = canvasRef.current.getContext("2d");
         ctx.clearRect(0, 0, imgRef.current.width, imgRef.current.height);
-        console.log(imgRef.current.complete);
-        console.log(imgRef.current.src)
         ctx.drawImage(imgRef.current, 0, 0,);
         Object.values(rects).forEach((rect) => {
             ctx.strokeRect(

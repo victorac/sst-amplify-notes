@@ -10,6 +10,7 @@ import Settings from "./containers/Settings";
 import UnauthenticatedRoute from "./components/UnauthenticatedRoute";
 import AuthenticatedRoute from "./components/AuthenticatedRoute";
 import WebCamera from "./containers/WebCamera";
+import Camera from "./components/Camera";
 
 export default function Links() {
     return (
@@ -60,6 +61,14 @@ export default function Links() {
                 element={
                     <AuthenticatedRoute>
                         <WebCamera height="100%" width="100%" />
+                    </AuthenticatedRoute>
+                }
+            />
+            <Route
+                path="/camera2"
+                element={
+                    <AuthenticatedRoute>
+                        <Camera height="100%" width="100%" />
                     </AuthenticatedRoute>
                 }
             />

@@ -3,6 +3,7 @@ import { RekognitionClient, DetectTextCommand } from "@aws-sdk/client-rekognitio
 import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
 import { DynamoDBDocumentClient, PutCommand } from "@aws-sdk/lib-dynamodb";
 
+
 export const main = handler(async (event) => {
     console.log(event);
     const region = event.Records[0].awsRegion;
@@ -23,7 +24,7 @@ export const main = handler(async (event) => {
     const data = await rekognitionClient.send(new DetectTextCommand(params));
     const detectedLines = data.TextDetections.filter(el => el.Type === "LINE")
     const detectedWords = data.TextDetections.filter(el => el.Type === "WORD")
-    const sortedDetectedLines = detectedLines.sort((a, b) => b.Confidence - a.Confidence).slice(0, 20)
+    const sortedDetectedLines = detectedLines.sort((a, b) => b.Confidence - a.Confidence).slice(0, 100)
     const sortedDetectedWords = detectedWords.sort((a, b) => b.Confidence - a.Confidence).slice(0, 100)
     const userIdentityId = objectKey.split("/")[1];
     const putParams = {
