@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import ListGroup from 'react-bootstrap/ListGroup';
 import { Button, ButtonGroup, Container, Image as RBImage, Row } from 'react-bootstrap';
 
@@ -19,17 +19,48 @@ export default function ImageTray({ images, setImages }) {
             </ListGroup.Item>
         );
     })
-    function handleRemove(){
+    function handleRemove() {
         delete images[selectedImage];
         setSelectedImage(Object.keys(images)[0] ?? null);
-        setImages({...images});
+        setImages({ ...images });
     }
+    const canvasRef = useRef(null);
+    const imageRef = useRef(null);
+    function drawImage(event) {
+        const imageRef = event.target;
+        setImageDimensions({
+            width: imageRef.width,
+            height: imageRef.height
+        });
+        const ctx = canvasRef.current.getContext("2d");
+        ctx.clearRect(0, 0, imageRef.width, imageRef.height);
+        ctx.drawImage(imageRef, 0, 0,);
+    }
+    function redraw(imageRef) {
+        setImageDimensions({
+            width: imageRef.width,
+            height: imageRef.height
+        });
+        const ctx = canvasRef.current.getContext("2d");
+        ctx.clearRect(0, 0, canvasRef.current.width, canvasRef.current.height);
+        ctx.drawImage(imageRef, 0, 0,);
+    }
+    useEffect(() => {
+        if (canvasRef.current && imageRef.current) {
+            redraw(imageRef.current);
+        }
+    }, [selectedImage]);
+    const [imageDimesions, setImageDimensions] = useState({
+        width: 0,
+        height: 0
+    });
     return (
         <Container>
             <Row className="position-relative">
-                <RBImage className="p-0 m-0" src={images[selectedImage]?.image} rounded/>
+                <RBImage ref={imageRef} src={images[selectedImage]?.image} style={{ display: "none" }} onLoad={drawImage} />
+                <canvas width={imageDimesions.width} height={imageDimesions.height} className="p-0 m-0" ref={canvasRef}></canvas>
                 {selectedImage &&
-                    <ButtonGroup className="p-0 m-0 position-absolute" style={{ bottom: 0}}>
+                    <ButtonGroup className="p-0 m-0 position-absolute" style={{ bottom: 0 }}>
                         <Button variant="primary">Crop</Button>
                         <Button variant="danger" onClick={handleRemove}>Remove</Button>
                     </ButtonGroup>}
