@@ -25,7 +25,6 @@ export default function Camera({setPicture}) {
     const capture = useCallback(
         () => {
             const imageSrc = webcamRef.current.getScreenshot();
-            // setPicture(imageSrc);
             const imageId = uuid.v1();
             const currentImages = Object.entries(images);
             const newImages = currentImages.concat([[imageId, {image: imageSrc}]]);
@@ -47,7 +46,6 @@ export default function Camera({setPicture}) {
         if (!screenfull.isFullscreen) setUseCamera(false);
     });
 
-    
     return (
         <>
             <div ref={videoRef} className="d-flex flex-column justify-content-center">
@@ -68,7 +66,7 @@ export default function Camera({setPicture}) {
                 }
             </div>
             <Button onClick={requestFS}>Open Camera</Button>
-            <ImageTray images={images} />
+            <ImageTray images={images} setImages={setImages} />
         </>
     );
 }
