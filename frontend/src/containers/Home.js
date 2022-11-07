@@ -45,7 +45,7 @@ export default function Home() {
                         <span className="ml-2 font-weight-bold">Create a new entry</span>
                     </ListGroup.Item>
                 </LinkContainer>
-                {notes.map(({ noteId, content, createdAt }) => (
+                {notes.sort((a, b) => b.createdAt - a.createdAt).map(({ noteId, content, createdAt }) => (
                     <LinkContainer key={noteId} to={`/notes/${noteId}`}>
                         <ListGroup.Item action>
                             <span className="font-weight-bold">
