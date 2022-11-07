@@ -8,12 +8,20 @@ import "cropperjs/dist/cropper.css";
 
 export default function ImageTray({ images, setImages }) {
     const [selectedImage, setSelectedImage] = useState(Object.keys(images)[0] ?? null);
+    function handleSelect(entryIndex) {
+        if (!isEditing) {
+            if (selectedImage === entryIndex)
+                setSelectedImage(null)
+            else
+                setSelectedImage(entryIndex)
+        }
+    }
     const imageList = Object.entries(images).map((entry, index) => {
         const entryIndex = entry[0]
         const element = entry[1]
         return (
-            <ListGroup.Item style={{ cursor: "pointer", minWidth: "25%", minHeigth: "25%" }} key={index} onClick={() => selectedImage === entryIndex ? setSelectedImage(null) : setSelectedImage(entryIndex)}>
-                <RBImage width="100%" height="100%" id={entryIndex} src={element.image} />
+            <ListGroup.Item style={{ cursor: "pointer", maxWidth: "25%", maxHeigth: "25%" }} key={index} onClick={() => handleSelect(entryIndex)}>
+                <RBImage id={entryIndex} src={element.image} />
             </ListGroup.Item>
         );
     })
@@ -25,7 +33,9 @@ export default function ImageTray({ images, setImages }) {
     const imageRef = useRef(null);
     const [cropper, setCropper] = useState(null);
     const [isEditing, setIsEditing] = useState(false);
+    const cropContainerRef = useRef(null);
     useEffect(() => {
+        console.log(cropContainerRef.style)
         cropper?.clear();
         cropper?.destroy();
         if (imageRef.current && isEditing) {
@@ -41,13 +51,29 @@ export default function ImageTray({ images, setImages }) {
         setImages({ ...images });
         setIsEditing(false);
     }
+    const [imgDimesions, setImageDimensions] = useState({
+        width: 0,
+        height: 0
+    })
+    useEffect(() => {
+        const img = new Image();
+        img.onload = function () {
+            const newD = {
+                width: this.width,
+                height: this.height
+            };
+            setImageDimensions(newD);
+        }
+        img.src = images[selectedImage]?.image;
+    }, [selectedImage]);
+
     return (
-        <Container style={{ maxHeight: "50%" }}>
+        <Container>
             <Row className="position-relative">
                 {selectedImage &&
                     <>
-                        <div className="p-0 m-0" style={{ "maxWidth": "100%", "maxHeight": "100%" }}>
-                            <RBImage ref={imageRef} src={images[selectedImage]?.image} />
+                        <div ref={cropContainerRef} className="p-0 m-0" style={imgDimesions}>
+                            <RBImage ref={imageRef} width={imgDimesions.width} height={imgDimesions.height} src={images[selectedImage]?.image} />
                         </div>
                         <ButtonGroup className="p-0 m-0" style={{ "maxWidth": "100%", "maxHeight": "100%" }}>
                             {

@@ -11,6 +11,7 @@ import UnauthenticatedRoute from "./components/UnauthenticatedRoute";
 import AuthenticatedRoute from "./components/AuthenticatedRoute";
 import WebCamera from "./containers/WebCamera";
 import Camera from "./components/Camera";
+import NewEntry from "./containers/NewEntry";
 
 export default function Links() {
     return (
@@ -69,6 +70,14 @@ export default function Links() {
                 element={
                     <AuthenticatedRoute>
                         <Camera height="100%" width="100%" />
+                    </AuthenticatedRoute>
+                }
+            />
+            <Route
+                path="/entries/new"
+                element={
+                    <AuthenticatedRoute>
+                        <NewEntry />
                     </AuthenticatedRoute>
                 }
             />

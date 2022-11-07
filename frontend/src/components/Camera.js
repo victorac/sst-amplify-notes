@@ -16,12 +16,11 @@ function urltoFile(url, filename, mimeType) {
 }
 
 
-export default function Camera({setPicture}) {
+export default function Camera({images, setImages}) {
     const videoConstraints = {
         facingMode: "environment"
     }
     const webcamRef = useRef(null);
-    const [images, setImages ] = useState({});
     const capture = useCallback(
         () => {
             const imageSrc = webcamRef.current.getScreenshot();
@@ -66,7 +65,6 @@ export default function Camera({setPicture}) {
                 }
             </div>
             <Button onClick={requestFS}>Open Camera</Button>
-            <ImageTray images={images} setImages={setImages} />
         </>
     );
 }
