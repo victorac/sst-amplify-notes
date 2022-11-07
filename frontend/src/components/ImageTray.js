@@ -35,7 +35,6 @@ export default function ImageTray({ images, setImages }) {
     const [isEditing, setIsEditing] = useState(false);
     const cropContainerRef = useRef(null);
     useEffect(() => {
-        console.log(cropContainerRef.style)
         cropper?.clear();
         cropper?.destroy();
         if (imageRef.current && isEditing) {

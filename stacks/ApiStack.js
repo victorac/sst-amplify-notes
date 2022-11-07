@@ -29,6 +29,7 @@ export function ApiStack({ stack, app }) {
             "GET /notes/{id}": "functions/get.main",
             "GET /detect-text": "functions/listDetectText.main",
             "GET /detect-text/{id}": "functions/getDetectText.main",
+            "POST /entries": "functions/createEntry.main",
         },
     });
 

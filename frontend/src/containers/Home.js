@@ -39,13 +39,13 @@ export default function Home() {
     function renderNotesList(notes) {
         return (
             <>
-                <LinkContainer to="/camera">
+                <LinkContainer to="/entries/new">
                     <ListGroup.Item action className="py-3 text-nowrap text-truncate">
                         <BsPencilSquare size={17} />
                         <span className="ml-2 font-weight-bold">Create a new entry</span>
                     </ListGroup.Item>
                 </LinkContainer>
-                {notes.map(({ noteId, content, createdAt }) => (
+                {notes.sort((a, b) => b.createdAt - a.createdAt).map(({ noteId, content, createdAt }) => (
                     <LinkContainer key={noteId} to={`/notes/${noteId}`}>
                         <ListGroup.Item action>
                             <span className="font-weight-bold">
