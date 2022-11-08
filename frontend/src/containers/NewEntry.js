@@ -70,8 +70,8 @@ export default function NewEntry() {
                 keys.push(key);
             }
             const content = ""
-            await createEntry({ content, keys });
-            nav("/");
+            const {noteId} = await createEntry({ content, keys });
+            nav(`/entries/${noteId}`);
         } catch (e) {
             onError(e);
             setIsLoading(false);

@@ -46,7 +46,7 @@ export default function Home() {
                     </ListGroup.Item>
                 </LinkContainer>
                 {notes.sort((a, b) => b.createdAt - a.createdAt).map(({ noteId, content, createdAt }) => (
-                    <LinkContainer key={noteId} to={`/notes/${noteId}`}>
+                    <LinkContainer key={noteId} to={`/entries/${noteId}`}>
                         <ListGroup.Item action>
                             <span className="font-weight-bold">
                                 {content && content.trim().split("/n")[0]}

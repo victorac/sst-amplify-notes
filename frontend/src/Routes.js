@@ -12,6 +12,7 @@ import AuthenticatedRoute from "./components/AuthenticatedRoute";
 import WebCamera from "./containers/WebCamera";
 import Camera from "./components/Camera";
 import NewEntry from "./containers/NewEntry";
+import { Entry } from "./containers/Entry";
 
 export default function Links() {
     return (
@@ -78,6 +79,14 @@ export default function Links() {
                 element={
                     <AuthenticatedRoute>
                         <NewEntry />
+                    </AuthenticatedRoute>
+                }
+            />
+            <Route
+                path="/entries/:id"
+                element={
+                    <AuthenticatedRoute>
+                        <Entry />
                     </AuthenticatedRoute>
                 }
             />
