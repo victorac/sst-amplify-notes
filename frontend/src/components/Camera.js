@@ -4,19 +4,10 @@ import Button from "react-bootstrap/Button"
 import 'react-image-crop/dist/ReactCrop.css';
 import "./Camera.css"
 import screenfull from 'screenfull';
-import ImageTray from "./ImageTray";
 import * as uuid from "uuid";
 
-function urltoFile(url, filename, mimeType) {
-    mimeType = mimeType || (url.match(/^data:([^;]+);/) || '')[1];
-    return (fetch(url)
-        .then(function (res) { return res.arrayBuffer(); })
-        .then(function (buf) { return new File([buf], filename, { type: mimeType }); })
-    );
-}
 
-
-export default function Camera({images, setImages}) {
+export default function Camera({entry, setEntry}) {
     const videoConstraints = {
         facingMode: "environment"
     }
@@ -25,11 +16,13 @@ export default function Camera({images, setImages}) {
         () => {
             const imageSrc = webcamRef.current.getScreenshot();
             const imageId = uuid.v1();
-            const currentImages = Object.entries(images);
-            const newImages = currentImages.concat([[imageId, {image: imageSrc}]]);
-            setImages(Object.fromEntries(newImages));
+            entry.imageData[imageId] = {image: imageSrc}
+            setEntry({...entry});
+            // const currentImages = Object.entries(images);
+            // const newImages = currentImages.concat([[imageId, {image: imageSrc}]]);
+            // setImages(Object.fromEntries(newImages));
         },
-        [webcamRef, images]
+        [webcamRef, entry, setEntry]
     );
     const videoRef = useRef(null);
     const [useCamera, setUseCamera] = useState(false);

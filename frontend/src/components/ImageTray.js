@@ -4,10 +4,12 @@ import { Button, ButtonGroup, Container, Image as RBImage, Row } from 'react-boo
 import Cropper from 'cropperjs';
 import "./ImageTray.css";
 import "cropperjs/dist/cropper.css";
+import { Storage } from "aws-amplify";
+import { onError } from "../lib/errorLib";
 
 
-export default function ImageTray({ images, setImages }) {
-    const [selectedImage, setSelectedImage] = useState(Object.keys(images)[0] ?? null);
+export default function ImageTray({ entry, setEntry }) {
+    const [selectedImage, setSelectedImage] = useState(Object.keys(entry.imageData)[0] ?? null);
     function handleSelect(entryIndex) {
         if (!isEditing) {
             if (selectedImage === entryIndex)
@@ -16,7 +18,7 @@ export default function ImageTray({ images, setImages }) {
                 setSelectedImage(entryIndex)
         }
     }
-    const imageList = Object.entries(images).map((entry, index) => {
+    const imageList = Object.entries(entry.imageData).map((entry, index) => {
         const entryIndex = entry[0]
         const element = entry[1]
         return (
@@ -25,10 +27,19 @@ export default function ImageTray({ images, setImages }) {
             </ListGroup.Item>
         );
     })
-    function handleRemove() {
-        delete images[selectedImage];
-        setSelectedImage(Object.keys(images)[0] ?? null);
-        setImages({ ...images });
+    async function handleRemove() {
+        delete entry.imageData[selectedImage];
+        if (entry.imageURL?.[selectedImage]) {
+            try {
+                await Storage.vault.remove(selectedImage);
+                delete entry.imageURL[selectedImage];
+                delete entry.imageDetectionResponse[selectedImage];
+            } catch (e) {
+                onError(e);
+            }
+        }
+        setSelectedImage(Object.keys(entry.imageData)[0] ?? null);
+        setEntry({ ...entry });
     }
     const imageRef = useRef(null);
     const [cropper, setCropper] = useState(null);
@@ -46,8 +57,10 @@ export default function ImageTray({ images, setImages }) {
     function handleCrop() {
         const canvas = cropper?.getCroppedCanvas();
         const data = canvas.toDataURL();
-        images[selectedImage].image = data;
-        setImages({ ...images });
+        entry.imageData[selectedImage].image = data;
+        entry.imageData[selectedImage].edited = true;
+        entry.imageData[selectedImage].uploaded = false;
+        setEntry({ ...entry });
         setIsEditing(false);
     }
     const [imgDimesions, setImageDimensions] = useState({
@@ -63,7 +76,7 @@ export default function ImageTray({ images, setImages }) {
             };
             setImageDimensions(newD);
         }
-        img.src = images[selectedImage]?.image;
+        img.src = entry.imageData[selectedImage]?.image;
     }, [selectedImage]);
 
     return (
@@ -72,7 +85,7 @@ export default function ImageTray({ images, setImages }) {
                 {selectedImage &&
                     <>
                         <div ref={cropContainerRef} className="p-0 m-0" style={imgDimesions}>
-                            <RBImage ref={imageRef} width={imgDimesions.width} height={imgDimesions.height} src={images[selectedImage]?.image} />
+                            <RBImage ref={imageRef} width={imgDimesions.width} height={imgDimesions.height} src={entry.imageData[selectedImage]?.image} />
                         </div>
                         <ButtonGroup className="p-0 m-0" style={{ "maxWidth": "100%", "maxHeight": "100%" }}>
                             {

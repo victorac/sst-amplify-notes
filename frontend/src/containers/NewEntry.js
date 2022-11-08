@@ -13,16 +13,23 @@ import { useNavigate } from "react-router-dom";
 
 export default function NewEntry() {
     const nav = useNavigate();
-    const [images, setImages] = useState({});
+    const [entry, setEntry] = useState({
+        imageData: {},
+        imageURL: {},
+        imageDetectionResponse: {},
+        keys: {},
+    });
     const [isLoading, setIsLoading] = useState(false);
 
     function fromFiletoBase64(file) {
         const reader = new FileReader()
         reader.addEventListener('load', () => {
             const imageId = uuid.v1();
-            const currentImages = Object.entries(images);
-            const newImages = Object.fromEntries(currentImages.concat([[imageId, { image: reader.result?.toString() || '' }]]))
-            setImages(newImages);
+            entry.imageData[imageId] = { image: reader.result?.toString() || '' }
+            setEntry({...entry});
+            // const currentImages = Object.entries(images);
+            // const newImages = Object.fromEntries(currentImages.concat([[imageId, { image: reader.result?.toString() || '' }]]))
+            // setImages(newImages);
         })
         reader.readAsDataURL(file)
     }
@@ -48,7 +55,7 @@ export default function NewEntry() {
     }
 
     async function handleSubmit() {
-        const array = Object.entries(images);
+        const array = Object.entries(entry.imageData);
         const files = [];
         setIsLoading(true);
         for (let index = 0; index < array.length; index++) {
@@ -78,16 +85,15 @@ export default function NewEntry() {
         }
 
     }
-
     return (
         <div className="d-grid gap-2">
-            <Camera images={images} setImages={setImages} />
+            <Camera entry={entry} setEntry={setEntry} />
             <FormGroup>
                 <FormLabel>Input image from file</FormLabel>
                 <FormControl type="file" accept=".jpg,.jpeg" onChange={handleFileChange} />
             </FormGroup>
-            <ImageTray images={images} setImages={setImages} />
-            <LoaderButton isLoading={isLoading} onClick={handleSubmit}>Upload Images!</LoaderButton>
+            <ImageTray entry={entry} setEntry={setEntry} />
+            <LoaderButton isLoading={isLoading} disabled={Object.values(entry.imageData).length === 0} onClick={handleSubmit}>Upload Images!</LoaderButton>
         </div>
 
     );
