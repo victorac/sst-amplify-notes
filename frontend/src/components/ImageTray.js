@@ -23,7 +23,7 @@ export default function ImageTray({ entry, setEntry }) {
         const element = entry[1]
         return (
             <ListGroup.Item style={{ cursor: "pointer", maxWidth: "25%", maxHeigth: "25%" }} key={index} onClick={() => handleSelect(entryIndex)}>
-                <RBImage id={entryIndex} src={element.image} />
+                <RBImage style={{ maxWidth: "100%", maxHeigth: "100%" }} id={entryIndex} src={element.image} />
             </ListGroup.Item>
         );
     })
@@ -48,11 +48,15 @@ export default function ImageTray({ entry, setEntry }) {
     useEffect(() => {
         cropper?.clear();
         cropper?.destroy();
-        if (imageRef.current && isEditing) {
-            setCropper(new Cropper(imageRef.current, {
-                viewMode: 3,
-            }));
-        }
+        setTimeout(() => {
+            if (imageRef.current && isEditing) {
+                setCropper(new Cropper(imageRef.current, {
+                    viewMode: 1,
+                    minContainerWidth: 0,
+                    minContainerHeight: 0,
+                }));
+            }
+        }, 100);
     }, [isEditing]);
     function handleCrop() {
         const canvas = cropper?.getCroppedCanvas();
@@ -81,39 +85,36 @@ export default function ImageTray({ entry, setEntry }) {
 
     return (
         <Container>
-            <Row className="position-relative">
-                {selectedImage &&
-                    <>
-                        <div ref={cropContainerRef} className="p-0 m-0" style={imgDimesions}>
-                            <RBImage ref={imageRef} width={imgDimesions.width} height={imgDimesions.height} src={entry.imageData[selectedImage]?.image} />
-                        </div>
-                        <ButtonGroup className="p-0 m-0" style={{ "maxWidth": "100%", "maxHeight": "100%" }}>
-                            {
-                                isEditing ?
-                                    <>
-                                        <Button variant="secondary" onClick={() => cropper?.rotate(-5)}>Rotate Left</Button>
-                                        <Button variant="primary" onClick={handleCrop}>Crop</Button>
-                                        <Button variant="secondary" onClick={() => cropper?.reset()}>Reset</Button>
-                                        <Button variant="danger" onClick={() => setIsEditing(false)}>Cancel Edit</Button>
-                                        <Button variant="secondary" onClick={() => cropper?.rotate(5)}>Rotate Right</Button>
-                                    </>
-                                    :
-                                    <>
-                                        <Button variant="primary" onClick={() => setIsEditing(true)}>Edit</Button>
-                                        <Button variant="danger" onClick={handleRemove}>Remove</Button>
-                                    </>
-                            }
-                        </ButtonGroup>
-                    </>
-
-                }
-            </Row>
+            {selectedImage &&
+                <Row className="justify-content-md-center">
+                    <div ref={cropContainerRef} className="p-0 m-0" style={{ ...imgDimesions }}>
+                        <RBImage ref={imageRef} width={imgDimesions.width} height={imgDimesions.height} src={entry.imageData[selectedImage]?.image} />
+                    </div>
+                    <ButtonGroup className="p-0 m-0" style={{ "maxWidth": "100%", "maxHeight": "100%" }}>
+                        {
+                            isEditing ?
+                                <>
+                                    <Button variant="secondary" onClick={() => cropper?.rotate(-5)}>Rotate Left</Button>
+                                    <Button variant="primary" onClick={handleCrop}>Crop</Button>
+                                    <Button variant="secondary" onClick={() => cropper?.reset()}>Reset</Button>
+                                    <Button variant="danger" onClick={() => setIsEditing(false)}>Cancel Edit</Button>
+                                    <Button variant="secondary" onClick={() => cropper?.rotate(5)}>Rotate Right</Button>
+                                </>
+                                :
+                                <>
+                                    <Button variant="primary" onClick={() => setIsEditing(true)}>Edit</Button>
+                                    <Button variant="danger" onClick={handleRemove}>Remove</Button>
+                                </>
+                        }
+                    </ButtonGroup>
+                </Row>
+            }
             <Row className="justify-content-md-center mt-2" style={{ maxHeight: "10%" }}>
                 <ListGroup style={{ "overflowX": "auto", "maxWidth": "100%", "maxHeight": "25%" }} flush="true" horizontal>
                     {imageList}
                 </ListGroup>
             </Row>
-        </Container>
+        </Container >
     );
 
 }
