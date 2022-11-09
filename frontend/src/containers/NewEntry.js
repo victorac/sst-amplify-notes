@@ -68,13 +68,13 @@ export default function NewEntry() {
             files.push(imageFile);
         }
         try {
-            const keys = [];
+            const imgKeys = [];
             for (let index = 0; index < files.length; index++) {
                 const key = files[index] ? await s3Upload(files[index]) : null;
-                keys.push(key);
+                imgKeys.push(key);
             }
             const content = ""
-            const {noteId} = await createEntry({ content, keys });
+            const {noteId} = await createEntry({ content, imgKeys });
             nav(`/entries/${noteId}`);
         } catch (e) {
             onError(e);

@@ -6,9 +6,10 @@ import "./ImageTray.css";
 import "cropperjs/dist/cropper.css";
 import { Storage } from "aws-amplify";
 import { onError } from "../lib/errorLib";
+import LoaderButton from "../components/LoaderButton";
 
 
-export default function ImageTray({ entry, setEntry }) {
+export default function ImageTray({ entry, setEntry, updateEntry }) {
     const [selectedImage, setSelectedImage] = useState(Object.keys(entry.imageData)[0] ?? null);
     function handleSelect(entryIndex) {
         if (!isEditing) {
@@ -27,19 +28,24 @@ export default function ImageTray({ entry, setEntry }) {
             </ListGroup.Item>
         );
     })
+    const [isLoading, setIsLoading] = useState(false);
     async function handleRemove() {
-        delete entry.imageData[selectedImage];
-        if (entry.imageURL?.[selectedImage]) {
+        setIsLoading(true);
+        if (entry.imageData[selectedImage].uploaded) {
             try {
                 await Storage.vault.remove(selectedImage);
                 delete entry.imageURL[selectedImage];
                 delete entry.imageDetectionResponse[selectedImage];
+                entry.imgKeys = entry.imgKeys.filter(e => e !== selectedImage);
+                await updateEntry({ updateData: { imgKeys: [...entry.imgKeys] } });
             } catch (e) {
                 onError(e);
             }
         }
+        delete entry.imageData[selectedImage];
         setSelectedImage(Object.keys(entry.imageData)[0] ?? null);
         setEntry({ ...entry });
+        setIsLoading(false);
     }
     const imageRef = useRef(null);
     const [cropper, setCropper] = useState(null);
@@ -103,7 +109,7 @@ export default function ImageTray({ entry, setEntry }) {
                                 :
                                 <>
                                     <Button variant="primary" onClick={() => setIsEditing(true)}>Edit</Button>
-                                    <Button variant="danger" onClick={handleRemove}>Remove</Button>
+                                    <LoaderButton regularClassName={true} isLoading={isLoading} variant="danger" onClick={handleRemove}>Remove</LoaderButton>
                                 </>
                         }
                     </ButtonGroup>

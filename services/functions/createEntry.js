@@ -12,7 +12,7 @@ export const main = handler(async (event) => {
             userId: event.requestContext.authorizer.iam.cognitoIdentity.identityId,
             noteId: uuid.v1(),
             content: data.content,
-            keys: data.keys,
+            imgKeys: data.imgKeys,
             createdAt: Date.now(),
         },
     };
