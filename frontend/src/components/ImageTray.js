@@ -77,7 +77,7 @@ export default function ImageTray({ entry, setEntry }) {
             setImageDimensions(newD);
         }
         img.src = entry.imageData[selectedImage]?.image;
-    }, [selectedImage]);
+    }, [selectedImage, entry]);
 
     return (
         <Container>
