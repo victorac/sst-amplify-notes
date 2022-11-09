@@ -108,7 +108,7 @@ export default function ImageTray({ entry, setEntry }) {
 
                 }
             </Row>
-            <Row className="justify-content-md-center" style={{ maxHeight: "10%" }}>
+            <Row className="justify-content-md-center mt-2" style={{ maxHeight: "10%" }}>
                 <ListGroup style={{ "overflowX": "auto", "maxWidth": "100%", "maxHeight": "25%" }} flush="true" horizontal>
                     {imageList}
                 </ListGroup>

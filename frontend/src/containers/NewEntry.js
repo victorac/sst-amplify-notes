@@ -27,9 +27,6 @@ export default function NewEntry() {
             const imageId = uuid.v1();
             entry.imageData[imageId] = { image: reader.result?.toString() || '' }
             setEntry({...entry});
-            // const currentImages = Object.entries(images);
-            // const newImages = Object.fromEntries(currentImages.concat([[imageId, { image: reader.result?.toString() || '' }]]))
-            // setImages(newImages);
         })
         reader.readAsDataURL(file)
     }
@@ -93,7 +90,7 @@ export default function NewEntry() {
                 <FormControl type="file" accept=".jpg,.jpeg" onChange={handleFileChange} />
             </FormGroup>
             <ImageTray entry={entry} setEntry={setEntry} />
-            <LoaderButton isLoading={isLoading} disabled={Object.values(entry.imageData).length === 0} onClick={handleSubmit}>Upload Images!</LoaderButton>
+            <LoaderButton isLoading={isLoading} disabled={Object.values(entry.imageData).length === 0} onClick={handleSubmit}>Create entry!</LoaderButton>
         </div>
 
     );
