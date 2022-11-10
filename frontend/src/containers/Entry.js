@@ -191,34 +191,33 @@ export function Entry() {
 
     }
     return (
-        <Container fluid>
-            <Row className="d-grid gap-2">
-                <Camera entry={entry} setEntry={setEntry} />
-                <FormGroup>
-                    <FormLabel>Input image from file</FormLabel>
-                    <FormControl type="file" accept=".jpg,.jpeg" onChange={handleFileChange} />
-                </FormGroup>
-                <ImageTray entry={entry} setEntry={setEntry} updateEntry={updateEntry} />
-                <LoaderButton
-                    isLoading={isLoading}
-                    disabled={Object.values(entry.imageData).filter(data => !data.uploaded).length === 0}
-                    onClick={handleUpload}>
-                    Upload Images!
-                </LoaderButton>
-                <LoaderButton
-                    variant="danger"
-                    isLoading={isLoading}
-                    disabled={Object.values(entry.imageData).length === 0}
-                    onClick={handleDeleteAllImages}
-                >
-                    Delete all images
-                </LoaderButton>
-            </Row>
+        <div>
+            <Camera entry={entry} setEntry={setEntry} />
+            <FormGroup>
+                <FormLabel>Input image from file</FormLabel>
+                <FormControl type="file" accept=".jpg,.jpeg" onChange={handleFileChange} />
+            </FormGroup>
+            <ImageTray entry={entry} setEntry={setEntry} updateEntry={updateEntry} />
+            <LoaderButton
+                isLoading={isLoading}
+                disabled={Object.values(entry.imageData).filter(data => !data.uploaded).length === 0}
+                onClick={handleUpload}>
+                Upload Images!
+            </LoaderButton>
+            <LoaderButton
+                variant="danger"
+                isLoading={isLoading}
+                disabled={Object.values(entry.imageData).length === 0}
+                onClick={handleDeleteAllImages}
+            >
+                Delete all images
+            </LoaderButton>
+
 
             <div className="justify-content-md-center">
-                <h6 className="mt-2">Detected text</h6>
+                <h6 className="mt-2">Detected text:</h6>
                 {entry && tags()}
             </div>
-        </Container>
+        </div>
     );
 }

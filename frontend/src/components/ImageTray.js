@@ -23,8 +23,8 @@ export default function ImageTray({ entry, setEntry, updateEntry }) {
         const entryIndex = entry[0]
         const element = entry[1]
         return (
-            <ListGroup.Item style={{ cursor: "pointer", maxWidth: "25%", maxHeigth: "25%" }} key={index} onClick={() => handleSelect(entryIndex)}>
-                <RBImage style={{ maxWidth: "100%", maxHeigth: "100%" }} id={entryIndex} src={element.image} />
+            <ListGroup.Item style={{ cursor: "pointer", minWidth:"10%", minHeight:"10%", maxWidth: "25%", maxHeigth: "25%" }} key={index} onClick={() => handleSelect(entryIndex)}>
+                <RBImage id={entryIndex} src={element.image} />
             </ListGroup.Item>
         );
     })
@@ -90,13 +90,13 @@ export default function ImageTray({ entry, setEntry, updateEntry }) {
     }, [selectedImage, entry]);
 
     return (
-        <Container>
+        <>
             {selectedImage &&
-                <Row className="justify-content-md-center">
-                    <div ref={cropContainerRef} className="p-0 m-0" style={{ ...imgDimesions }}>
+                <Row className="justify-content-md-center mt-2" >
+                    <div ref={cropContainerRef} style={{ ...imgDimesions }}>
                         <RBImage ref={imageRef} width={imgDimesions.width} height={imgDimesions.height} src={entry.imageData[selectedImage]?.image} />
                     </div>
-                    <ButtonGroup className="p-0 m-0" style={{ "maxWidth": "100%", "maxHeight": "100%" }}>
+                    <ButtonGroup  style={{ "maxWidth": "100%", "maxHeight": "100%" }}>
                         {
                             isEditing ?
                                 <>
@@ -115,12 +115,12 @@ export default function ImageTray({ entry, setEntry, updateEntry }) {
                     </ButtonGroup>
                 </Row>
             }
-            <Row className="justify-content-md-center mt-2" style={{ maxHeight: "10%" }}>
-                <ListGroup style={{ "overflowX": "auto", "maxWidth": "100%", "maxHeight": "25%" }} flush="true" horizontal>
+            <div className="justify-content-md-center mt-2" style={{ maxHeight: "10%" }}>
+                <ListGroup style={{ overflowX:"auto", minWidth:"10%", maxWidth: "100%", maxHeight: "25%" }} flush="true" horizontal>
                     {imageList}
                 </ListGroup>
-            </Row>
-        </Container >
+            </div>
+        </>
     );
 
 }

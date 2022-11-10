@@ -26,7 +26,7 @@ export default function NewEntry() {
         reader.addEventListener('load', () => {
             const imageId = uuid.v1();
             entry.imageData[imageId] = { image: reader.result?.toString() || '' }
-            setEntry({...entry});
+            setEntry({ ...entry });
         })
         reader.readAsDataURL(file)
     }
@@ -74,7 +74,7 @@ export default function NewEntry() {
                 imgKeys.push(key);
             }
             const content = ""
-            const {noteId} = await createEntry({ content, imgKeys });
+            const { noteId } = await createEntry({ content, imgKeys });
             nav(`/entries/${noteId}`);
         } catch (e) {
             onError(e);
@@ -83,9 +83,9 @@ export default function NewEntry() {
 
     }
     return (
-        <div className="d-grid gap-2">
+        <div>
             <Camera entry={entry} setEntry={setEntry} />
-            <FormGroup>
+            <FormGroup className="mt-2">
                 <FormLabel>Input image from file</FormLabel>
                 <FormControl type="file" accept=".jpg,.jpeg" onChange={handleFileChange} />
             </FormGroup>
