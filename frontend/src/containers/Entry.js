@@ -1,16 +1,17 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { API, Storage } from "aws-amplify";
 import { onError } from "../lib/errorLib";
-import { Badge, Col, Container, Image, Row } from "react-bootstrap";
+import { Badge } from "react-bootstrap";
 import Camera from "../components/Camera";
 import ImageTray from "../components/ImageTray";
 import LoaderButton from "../components/LoaderButton";
 import * as uuid from "uuid";
 import { FormControl, FormGroup, FormLabel } from "react-bootstrap";
-import { useFormFields } from "../lib/hooksLib";
 import config from "../config";
 import { s3Upload } from "../lib/awsLib";
+import AddTagOffcanvas from "../components/AddTagOffcanvas";
+import Button from "react-bootstrap/Button";
 
 export function Entry() {
     const { id } = useParams();
@@ -20,6 +21,7 @@ export function Entry() {
         imageURL: {},
         imageDetectionResponse: {},
         imgKeys: [],
+        tags: {},
     });
     const [isLoading, setIsLoading] = useState(false);
     const [reLoadEntry, setReLoadEntry] = useState(false);
@@ -182,14 +184,61 @@ export function Entry() {
         setIsLoading(false);
     }
 
-    const [fields, handleFieldChange] = useFormFields({});
-    const tags = () => {
+    const [showOffcanvas, setShowOffcanvas] = useState(false);
+
+    const handleCloseOffcanvas = () => setShowOffcanvas(false);
+
+    const [tags, setTags] = useState(entry.tags);
+    const [tagValue, setTagValue] = useState("");
+    const [tagCategory, setTagCategory] = useState("");
+
+    function handleAddTag(value, category) {
+        setTagValue(value)
+        setTagCategory(category)
+        setShowOffcanvas(true);
+    }
+    const createDetectionBadges = () => {
         const detections = [].concat(...Object.values(entry.imageDetectionResponse).map((value) => value.lineDetections));
         return detections.map((line, index) =>
-            <Badge key={index} style={{ cursor: "pointer" }} id={`tag-${id}`} pill bg="light" text="dark">{line.DetectedText}</Badge>
+            <Badge
+                key={index}
+                style={{ cursor: "pointer" }}
+                id={`detectionText-${index}`}
+                pill
+                bg="light"
+                text="dark"
+                onClick={() => handleAddTag(line.DetectedText, "")}
+            >{line.DetectedText}</Badge>
         )
-
     }
+
+    const createTagBadges = () => {
+        return Object.values(entry.tags).concat(Object.values(tags)).map(({ category, value }, index) =>
+            <Badge
+                key={index}
+                style={{ cursor: "pointer" }}
+                id={`tag-${index}`}
+                pill
+                bg="light"
+                text="dark"
+            >{value}</Badge>
+        )
+    }
+
+    async function updateEntryTags() {
+        setIsLoading(true);
+        try {
+            await updateEntry({
+                updateData: {
+                    tags: Object.assign({}, entry.tags, tags)
+                }
+            });
+        } catch (e) {
+            onError(e);
+        }
+        setIsLoading(false);
+    }
+
     return (
         <div>
             <Camera entry={entry} setEntry={setEntry} />
@@ -215,9 +264,25 @@ export function Entry() {
 
 
             <div className="justify-content-md-center">
-                <h6 className="mt-2">Detected text:</h6>
-                {entry && tags()}
+                <h6 className="mt-2">Add new tags!</h6>
+                {entry && createDetectionBadges()}
             </div>
+            <Button className="my-2" variant="primary" onClick={() => handleAddTag("", "")}>+</Button>
+            <AddTagOffcanvas
+                show={showOffcanvas}
+                handleClose={handleCloseOffcanvas}
+                value={tagValue}
+                setTagValue={setTagValue}
+                category={tagCategory}
+                setTagCategory={setTagCategory}
+                tags={tags}
+                setTags={setTags}
+            />
+            <div className="justify-content-md-center">
+                <h6 className="mt-2">Created tags:</h6>
+                {entry && createTagBadges()}
+            </div>
+            <LoaderButton isLoading={isLoading} variant="success" className="my-2" onClick={updateEntryTags}>Save</LoaderButton>
         </div>
     );
 }
