@@ -7,7 +7,7 @@ import Camera from "../components/Camera";
 import ImageTray from "../components/ImageTray";
 import LoaderButton from "../components/LoaderButton";
 import * as uuid from "uuid";
-import { FormControl, FormGroup, FormLabel } from "react-bootstrap";
+import { FormControl, FormGroup, FormLabel, FormSelect } from "react-bootstrap";
 import config from "../config";
 import { s3Upload } from "../lib/awsLib";
 import AddTagOffcanvas from "../components/AddTagOffcanvas";
@@ -22,6 +22,7 @@ export function Entry() {
         imageDetectionResponse: {},
         imgKeys: [],
         tags: {},
+        rating: "-1",
     });
     const [isLoading, setIsLoading] = useState(false);
     const [reLoadEntry, setReLoadEntry] = useState(false);
@@ -58,6 +59,9 @@ export function Entry() {
                 entry["imageDetectionResponse"] = {};
                 if (!entry.hasOwnProperty("tags")) {
                     entry["tags"] = {};
+                }
+                if (!entry.hasOwnProperty("rating")) {
+                    entry["rating"] = "-1";
                 }
                 if (entry.imgKeys) {
                     for (let index = 0; index < entry.imgKeys.length; index++) {
@@ -189,7 +193,13 @@ export function Entry() {
 
     const [showOffcanvas, setShowOffcanvas] = useState(false);
 
-    const handleCloseOffcanvas = () => setShowOffcanvas(false);
+    const handleCloseOffcanvas = () => {
+        setShowOffcanvas(false);
+    }
+
+    function handleUpdateTags() {
+        setUpdateBatch({ ...updateBatch, tags: true });
+    }
 
     const [tags, setTags] = useState(entry.tags);
     const [tagValue, setTagValue] = useState("");
@@ -242,6 +252,45 @@ export function Entry() {
         setIsLoading(false);
     }
 
+    async function updateEntryRating() {
+        setIsLoading(true);
+        try {
+            await updateEntry({
+                updateData: {
+                    rating: entry.rating,
+                }
+            });
+        } catch (e) {
+            onError(e);
+        }
+        setIsLoading(false);
+    }
+
+    function handleSelectRating(event) {
+        setEntry({ ...entry, rating: event.target.value });
+        setUpdateBatch({ ...updateBatch, rating: true });
+    }
+
+    function handleUpdate() {
+        const array = Object.keys(updateBatch);
+        console.log(array);
+        for (let index = 0; index < array.length; index++) {
+            if (array[index]) {
+                switch (array[index]) {
+                    case "rating":
+                        console.log("updating rating")
+                        updateEntryRating();
+                        break;
+                    case "tags":
+                        console.log("updating tags")
+                        updateEntryTags();
+                    default:
+                        break;
+                }
+            }
+        }
+    }
+    const [updateBatch, setUpdateBatch] = useState({});
     return (
         <div>
             <Camera entry={entry} setEntry={setEntry} />
@@ -280,12 +329,31 @@ export function Entry() {
                 setTagCategory={setTagCategory}
                 tags={tags}
                 setTags={setTags}
+                handleUpdateTags={handleUpdateTags}
             />
             <div className="justify-content-md-center">
-                <h6 className="mt-2">Created tags:</h6>
+                <span className="my-2">Tags:</span>
                 {entry && createTagBadges()}
             </div>
-            <LoaderButton isLoading={isLoading} variant="success" className="my-2" onClick={updateEntryTags}>Save</LoaderButton>
+
+            <div className="my-2">
+                <span >Rating:</span>
+            </div>
+
+            <FormSelect aria-label="rating select" onChange={handleSelectRating} value={entry.rating}>
+                <option value="-1">Select a rating</option>
+                <option value="1">The best</option>
+                <option value="2">Awesome</option>
+                <option value="3">Pretty good</option>
+                <option value="4">Good</option>
+                <option value="5">Okay</option>
+                <option value="6">Not for me</option>
+                <option value="7">Bad</option>
+                <option value="8">Pretty Bad</option>
+                <option value="9">The worst</option>
+            </FormSelect>
+
+            <LoaderButton isLoading={isLoading} variant="success" className="my-2" onClick={handleUpdate}>Save</LoaderButton>
         </div>
     );
 }

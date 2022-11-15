@@ -5,7 +5,7 @@ import Offcanvas from 'react-bootstrap/Offcanvas';
 import * as uuid from "uuid";
 
 
-export default function AddTagOffcanvas({ show, handleClose, value, setTagValue, category, setTagCategory, tags, setTags, ...props }) {
+export default function AddTagOffcanvas({ show, handleClose, value, setTagValue, category, setTagCategory, tags, setTags, handleUpdateTags, ...props }) {
 
     function handleAdd() {
         const id = uuid.v1();
@@ -13,6 +13,7 @@ export default function AddTagOffcanvas({ show, handleClose, value, setTagValue,
         newTag[id] = { category: category, value: value };
         setTags(Object.assign({}, tags, newTag));
         handleClose();
+        handleUpdateTags();
     }
 
     return (
