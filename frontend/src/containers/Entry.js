@@ -56,6 +56,9 @@ export function Entry() {
                 entry["imageURL"] = {};
                 entry["imageData"] = {};
                 entry["imageDetectionResponse"] = {};
+                if (!entry.hasOwnProperty("tags")) {
+                    entry["tags"] = {};
+                }
                 if (entry.imgKeys) {
                     for (let index = 0; index < entry.imgKeys.length; index++) {
                         const key = entry.imgKeys[index];
