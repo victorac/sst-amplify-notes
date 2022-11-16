@@ -7,8 +7,24 @@ export function StorageStack({ stack, app }) {
         fields: {
             userId: "string",
             noteId: "string",
+            rating: "string",
+            categoryId: "string",
         },
         primaryIndex: { partitionKey: "userId", sortKey: "noteId" },
+    });
+    const tagTable = new Table(stack, "Tags", {
+        fields: {
+            userId: "string",
+            noteId: "string",
+            tagId: "string",
+            categoryId: "string",
+        },
+        primaryIndex: { partitionKey: "userId", sortKey: "noteId" },
+        localIndexes: {
+            tag: {
+                sortKey: "tagId"
+            }
+        }
     });
     const textDetectionTable = new Table(stack, "TextDetections", {
         fields: {
@@ -16,20 +32,6 @@ export function StorageStack({ stack, app }) {
             imageId: "string",
         },
         primaryIndex: { partitionKey: "userId", sortKey: "imageId" },
-    });
-    const categoryTable = new Table(stack, "Categories", {
-        fields: {
-            userId: "string",
-            categoryId: "string",
-            tagId: "string",
-        },
-        primaryIndex: { partitionKey: "categoryId", sortKey: "tagId" },
-        localIndexes: {
-            tag: {
-                sortKey: "userId",
-                projection: "keys_only"
-            }
-        }
     });
 
     const bucket = new Bucket(stack, "Uploads", {
@@ -71,7 +73,7 @@ export function StorageStack({ stack, app }) {
     return {
         entryTable,
         textDetectionTable,
-        categoryTable,
+        tagTable,
         bucket,
     };
 }

@@ -2,7 +2,7 @@ import { Api, use } from "@serverless-stack/resources";
 import { StorageStack } from "./StorageStack";
 
 export function ApiStack({ stack, app }) {
-    const { entryTable, textDetectionTable, categoryTable } = use(StorageStack);
+    const { entryTable, textDetectionTable, tagTable } = use(StorageStack);
 
     // Create the API
     const api = new Api(stack, "Api", {
@@ -11,11 +11,11 @@ export function ApiStack({ stack, app }) {
         defaults: {
             authorizer: "iam",
             function: {
-                permissions: [entryTable, textDetectionTable, categoryTable],
+                permissions: [entryTable, textDetectionTable, tagTable],
                 environment: {
                     ENTRY_TABLE_NAME: entryTable.tableName,
                     TEXT_DETECTION_TABLE_NAME: textDetectionTable.tableName,
-                    CATEGORY_TABLE_NAME: categoryTable.tableName,
+                    TAG_TABLE_NAME: tagTable.tableName,
                     STRIPE_SECRET_KEY: process.env.STRIPE_SECRET_KEY,
                 },
             },

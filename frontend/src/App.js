@@ -2,12 +2,12 @@ import React, { useEffect, useState } from "react";
 import Navbar from "react-bootstrap/Navbar";
 import Nav from "react-bootstrap/Nav";
 import "./App.css";
-import Routes from "./Routes";
 import { LinkContainer } from "react-router-bootstrap";
 import { AppContext } from "./lib/contextLib";
 import { Auth } from "aws-amplify";
 import { useNavigate } from "react-router-dom";
 import { onError } from "./lib/errorLib";
+import { Outlet } from "react-router-dom";
 
 
 function App() {
@@ -74,7 +74,7 @@ function App() {
           </Navbar.Collapse>
         </Navbar>
         <AppContext.Provider value={{ isAuthenticated, userHasAuthenticated }}>
-          <Routes />
+          <Outlet />
         </AppContext.Provider>
       </div>
     )

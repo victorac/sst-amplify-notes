@@ -4,10 +4,21 @@ import './index.css';
 import App from './App';
 import reportWebVitals from './reportWebVitals';
 import "bootstrap/dist/css/bootstrap.min.css";
-import { BrowserRouter as Router } from "react-router-dom";
 import { Amplify } from "aws-amplify";
 import config from "./config";
-
+import {
+  createBrowserRouter,
+  RouterProvider,
+} from "react-router-dom";
+import Home from "./containers/Home";
+import Login from "./containers/Login";
+import Signup from "./containers/Signup";
+import NotFound from "./containers/NotFound";
+import Settings from "./containers/Settings";
+import UnauthenticatedRoute from "./components/UnauthenticatedRoute";
+import AuthenticatedRoute from "./components/AuthenticatedRoute";
+import NewEntry from "./containers/NewEntry";
+import { Entry } from "./containers/Entry";
 
 Amplify.configure({
   Auth: {
@@ -32,13 +43,65 @@ Amplify.configure({
   }
 });
 
+const router = createBrowserRouter([
+  {
+    path: "/",
+    element: <App />,
+    // loader: rootLoader,
+    errorElement: <NotFound />,
+    children: [
+      {
+        path: "",
+        element: <Home />
+      },
+      {
+        path: "login",
+        element:
+          <UnauthenticatedRoute>
+            <Login />
+          </UnauthenticatedRoute>,
+        // loader: teamLoader,
+      },
+      {
+        path: "signup",
+        element:
+          <UnauthenticatedRoute>
+            <Signup />
+          </UnauthenticatedRoute>,
+        // loader: teamLoader,
+      },
+      {
+        path: "settings",
+        element:
+          <AuthenticatedRoute>
+            <Settings />
+          </AuthenticatedRoute>,
+        // loader: teamLoader,
+      },
+      {
+        path: "entries/new",
+        element:
+          <AuthenticatedRoute>
+            <NewEntry />
+          </AuthenticatedRoute>,
+        // loader: teamLoader,
+      },
+      {
+        path: "entries/:id",
+        element:
+          <AuthenticatedRoute>
+            <Entry />
+          </AuthenticatedRoute>,
+        // loader: teamLoader,
+      },
+    ],
+  },
+]);
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
   <React.StrictMode>
-    <Router>
-      <App />
-    </Router>
+    <RouterProvider router={router} />
   </React.StrictMode>
 );
 
