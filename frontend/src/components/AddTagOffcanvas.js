@@ -3,17 +3,21 @@ import { FormControl, FormGroup, FormLabel } from 'react-bootstrap';
 import Button from 'react-bootstrap/Button';
 import Offcanvas from 'react-bootstrap/Offcanvas';
 import * as uuid from "uuid";
+import { API } from "aws-amplify";
 
 
-export default function AddTagOffcanvas({ show, handleClose, value, setTagValue, category, setTagCategory, tags, setTags, handleUpdateTags, ...props }) {
+export default function AddTagOffcanvas({ show, handleClose, value, setTagValue, category, setTagCategory, tags, setTags, entryId, ...props }) {
 
-    function handleAdd() {
-        const id = uuid.v1();
-        const newTag = {};
-        newTag[id] = { category: category, value: value };
-        setTags(Object.assign({}, tags, newTag));
+    function createTag(tag) {
+        return API.post("notes", `/tags/${entryId}`, {
+            body: tag
+        });
+    }
+
+    async function handleAdd() {
+        const createdTag = await createTag({ category: category, value: value });
+        setTags(tags.concat(createdTag));
         handleClose();
-        handleUpdateTags();
     }
 
     return (

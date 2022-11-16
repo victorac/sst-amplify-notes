@@ -21,7 +21,7 @@ export function Entry() {
         imageURL: {},
         imageDetectionResponse: {},
         imgKeys: [],
-        tags: {},
+        tags: [],
         rating: "-1",
     });
     const [isLoading, setIsLoading] = useState(false);
@@ -57,9 +57,6 @@ export function Entry() {
                 entry["imageURL"] = {};
                 entry["imageData"] = {};
                 entry["imageDetectionResponse"] = {};
-                if (!entry.hasOwnProperty("tags")) {
-                    entry["tags"] = {};
-                }
                 if (!entry.hasOwnProperty("rating")) {
                     entry["rating"] = "-1";
                 }
@@ -81,6 +78,8 @@ export function Entry() {
                 } else {
                     entry.imgKeys = [];
                 }
+                entry["tags"] = await API.get("notes", `/tags/${id}`);
+                console.log(entry)
                 setEntry({ ...entry });
             } catch (e) {
                 onError(e);
@@ -197,10 +196,6 @@ export function Entry() {
         setShowOffcanvas(false);
     }
 
-    function handleUpdateTags() {
-        setUpdateBatch({ ...updateBatch, tags: true });
-    }
-
     const [tags, setTags] = useState(entry.tags);
     const [tagValue, setTagValue] = useState("");
     const [tagCategory, setTagCategory] = useState("");
@@ -226,7 +221,7 @@ export function Entry() {
     }
 
     const createTagBadges = () => {
-        return Object.values(entry.tags).concat(Object.values(tags)).map(({ category, value }, index) =>
+        return entry.tags.concat(tags).map(({ category, value }, index) =>
             <Badge
                 key={index}
                 style={{ cursor: "pointer" }}
@@ -236,20 +231,6 @@ export function Entry() {
                 text="dark"
             >{value}</Badge>
         )
-    }
-
-    async function updateEntryTags() {
-        setIsLoading(true);
-        try {
-            await updateEntry({
-                updateData: {
-                    tags: Object.assign({}, entry.tags, tags)
-                }
-            });
-        } catch (e) {
-            onError(e);
-        }
-        setIsLoading(false);
     }
 
     async function updateEntryRating() {
@@ -283,7 +264,6 @@ export function Entry() {
                         break;
                     case "tags":
                         console.log("updating tags")
-                        updateEntryTags();
                     default:
                         break;
                 }
@@ -329,7 +309,7 @@ export function Entry() {
                 setTagCategory={setTagCategory}
                 tags={tags}
                 setTags={setTags}
-                handleUpdateTags={handleUpdateTags}
+                entryId={id}
             />
             <div className="justify-content-md-center">
                 <span className="my-2">Tags:</span>

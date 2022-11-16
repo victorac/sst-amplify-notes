@@ -31,7 +31,9 @@ export function ApiStack({ stack, app }) {
             "GET /detect-text/{id}": "functions/getDetectText.main",
             "POST /entries": "functions/createEntry.main",
             "GET /entries/{id}": "functions/get.main",
-            "PUT /entries/{id}": "functions/updateEntry.main"
+            "PUT /entries/{id}": "functions/updateEntry.main",
+            "GET /tags/{id}": "functions/listTags.main",
+            "POST /tags/{id}": "functions/createTag.main",
         },
     });
 
