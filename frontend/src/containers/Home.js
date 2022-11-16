@@ -1,41 +1,31 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 import { ListGroup } from "react-bootstrap";
 import { useAppContext } from "../lib/contextLib";
 import { onError } from "../lib/errorLib";
 import { API } from "aws-amplify";
 import { LinkContainer } from "react-router-bootstrap";
 import { BsPencilSquare } from "react-icons/bs";
+import { useLoaderData } from "react-router-dom";
 import "./Home.css";
 
 
-export default function Home() {
-    const [notes, setNotes] = useState([]);
-    const { isAuthenticated } = useAppContext();
-    const [isLoading, setIsLoading] = useState(false);
+function loadNotes() {
+    return API.get("notes", "/notes");
+}
 
-    useEffect(() => {
-        async function onLoad() {
-            if (!isAuthenticated) {
-                return;
-            }
-
-            try {
-                const notes = await loadNotes();
-                setNotes(notes);
-            } catch (e) {
-                onError(e);
-            }
-
-            setIsLoading(false);
-        }
-
-        onLoad();
-    }, [isAuthenticated]);
-
-    function loadNotes() {
-        return API.get("notes", "/notes");
+export async function loader() {
+    try {
+        const notes = await loadNotes();
+        return { notes };
+    } catch (e) {
+        onError(e);
+        return { notes: [] };
     }
+}
 
+export default function Home() {
+    const { isAuthenticated } = useAppContext();
+    const { notes } = useLoaderData();
     function renderNotesList(notes) {
         return (
             <>
@@ -75,7 +65,7 @@ export default function Home() {
         return (
             <div className="notes">
                 <h2 className="pb-3 mt-4 mb-3 border-bottom">Your entries</h2>
-                <ListGroup>{!isLoading && renderNotesList(notes)}</ListGroup>
+                <ListGroup>{renderNotesList(notes)}</ListGroup>
             </div>
         );
     }
