@@ -12,19 +12,14 @@ export function StorageStack({ stack, app }) {
         },
         primaryIndex: { partitionKey: "userId", sortKey: "noteId" },
     });
-    const tagTable = new Table(stack, "Tags", {
+    const tagTable = new Table(stack, "Tags2", {
         fields: {
             userId: "string",
             noteId: "string",
             tagId: "string",
             categoryId: "string",
         },
-        primaryIndex: { partitionKey: "userId", sortKey: "noteId" },
-        localIndexes: {
-            tag: {
-                sortKey: "tagId"
-            }
-        }
+        primaryIndex: { partitionKey: "noteId", sortKey: "tagId" },
     });
     const textDetectionTable = new Table(stack, "TextDetections", {
         fields: {
